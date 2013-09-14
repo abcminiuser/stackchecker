@@ -96,5 +96,31 @@ namespace FourWalledCubicle.StackChecker
             memorySegment = null;
             return false;
         }
+
+        private void addInstrumentCode_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            string startupProjectName = string.Empty;
+            SolutionBuild solutionBuild = mDTE.Solution.SolutionBuild;
+
+            if ((solutionBuild == null) || (solutionBuild.StartupProjects == null))
+                return;
+
+            foreach (String projectName in (Array)solutionBuild.StartupProjects)
+            {
+                Project project = mDTE.Solution.Projects.Item(projectName);
+
+                try
+                {
+                    string instrumentFileLocation = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "_StackInstrument.c");
+
+                    System.IO.StreamWriter instrumentCode = new System.IO.StreamWriter(instrumentFileLocation);
+                    instrumentCode.Write(StackChecker.Resources.InstrumentationCode);
+                    instrumentCode.Close();
+
+                    project.ProjectItems.AddFromFile(instrumentFileLocation);
+                }
+                catch { }
+            }
+        }
     }
 }

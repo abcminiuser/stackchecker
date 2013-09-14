@@ -70,6 +70,24 @@ namespace FourWalledCubicle.StackChecker {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to void _StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (&quot;.init1&quot;)));
+        ///void _StackPaint(void)
+        ///{
+        ///	extern void* _end, __stack;
+        ///	uint8_t *p = &amp;_end;
+        ///
+        ///	while (p &lt;= &amp;__stack)
+        ///	  *(p++) = 0xDC;
+        ///}
+        ///.
+        /// </summary>
+        internal static string InstrumentationCode {
+            get {
+                return ResourceManager.GetString("InstrumentationCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Stack Checker.
         /// </summary>
         internal static string ToolWindowTitle {

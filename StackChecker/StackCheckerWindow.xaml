@@ -12,11 +12,18 @@
     <Grid VerticalAlignment="Center">
         <StackPanel Orientation="Vertical" Margin="10">
             <ProgressBar Height="30" Name="stackUsageProgress"/>
-            <TextBlock Margin="0,5,0,0" >
+            <DockPanel Margin="0,5,0,0">
+                <TextBlock>
                 <Run FontWeight="Bold">Device Name:</Run> <Run Name="deviceName">N/A</Run>
                 <LineBreak/>
                 <Run FontWeight="Bold">Maximum Stack Usage:</Run> <Run Name="stackUsageVal">N/A</Run>
-            </TextBlock>
+                </TextBlock>
+
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Name="addInstrumentCode" ToolTip="Add stack instrumenting code to project" Click="addInstrumentCode_Click">
+                    <Image Width="16" Height="16" Source="/StackChecker;component/Resources/GaugeIcon.png"/>
+                </Button>
+            </DockPanel>
+
         </StackPanel>
     </Grid>
 </UserControl>

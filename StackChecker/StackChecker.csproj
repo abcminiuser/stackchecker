@@ -168,6 +168,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Resource Include="Resources\InstrumentationCode.c" />
     <Resource Include="Resources\GaugeIcon.png" />
   </ItemGroup>
   <ItemGroup>
