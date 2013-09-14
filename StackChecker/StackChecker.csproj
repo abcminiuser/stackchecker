@@ -115,10 +115,10 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyControl.xaml.cs">
-      <DependentUpon>MyControl.xaml</DependentUpon>
+    <Compile Include="StackCheckerWindow.xaml.cs">
+      <DependentUpon>StackCheckerWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MyToolWindow.cs" />
+    <Compile Include="StackCheckerToolWindow.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -162,7 +162,7 @@
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="MyControl.xaml">
+    <Page Include="StackCheckerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
