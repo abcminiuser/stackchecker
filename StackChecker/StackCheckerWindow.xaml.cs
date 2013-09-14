@@ -74,7 +74,7 @@ namespace FourWalledCubicle.StackChecker
 
             stackUsageVal.Text = string.Format("{0}/{1} ({2}%)",
                 stackUsageProgress.Value.ToString(), stackUsageProgress.Maximum.ToString(),
-                (int)((100.0 * stackUsageProgress.Value) / stackUsageProgress.Maximum));
+                Math.Min(100, Math.Ceiling((100.0 * stackUsageProgress.Value) / stackUsageProgress.Maximum)));
         }
 
         bool GetInternalSRAM(ITarget2 target, out IAddressSpace addressSpace, out IMemorySegment memorySegment)
