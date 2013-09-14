@@ -30,7 +30,7 @@ namespace FourWalledCubicle.StackChecker
 
         void mDebuggerEvents_OnEnterRunMode(dbgEventReason Reason)
         {
-            stackUsageProgress.Maximum = 0;
+            stackUsageProgress.Maximum = 100;
             stackUsageProgress.Value = 0;
             deviceName.Text = "(Break execution to refresh)";
             stackUsageVal.Text = "(Break execution to refresh)";
@@ -38,7 +38,7 @@ namespace FourWalledCubicle.StackChecker
 
         void mDebuggerEvents_OnEnterBreakMode(dbgEventReason Reason, ref dbgExecutionAction ExecutionAction)
         {
-            stackUsageProgress.Maximum = 0;
+            stackUsageProgress.Maximum = 100;
             stackUsageProgress.Value = 0;
             deviceName.Text = "N/A";
             stackUsageVal.Text = "N/A";
@@ -60,16 +60,16 @@ namespace FourWalledCubicle.StackChecker
 
         ulong GetMaximumStackUsage(ITarget2 target, IAddressSpace addressSpace, IMemorySegment memorySegment)
         {
-            for (ulong i = 0; i < memorySegment.Size; i++)
-            {
-                MemoryErrorRange[] errorRange;
-                byte[] result = target.GetMemory(
-                    target.GetAddressSpaceName(addressSpace.Name),
-                    (memorySegment.EndAddress - ((i + 1) * 4)), 1, 4, 0, out errorRange);
+            MemoryErrorRange[] errorRange;
+            byte[] result = target.GetMemory(
+                target.GetAddressSpaceName(addressSpace.Name),
+                memorySegment.Start, 1, (int)memorySegment.Size, 0, out errorRange);
 
-                if ((result[0] == 0xDC) && (result[1] == 0xDC) && (result[2] == 0xDC) && (result[3] == 0xDC))
+            for (int i = (result.Length - 1); i >= 0; i -= 4)
+            {
+                if ((result[i - 0] == 0xDC) && (result[i - 1] == 0xDC) && (result[i - 2] == 0xDC) && (result[i - 3] == 0xDC))
                 {
-                    return (i * 4);
+                    return (memorySegment.Size - (ulong)i);
                 }
             }
 
