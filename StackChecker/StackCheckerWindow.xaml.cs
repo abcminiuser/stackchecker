@@ -1,21 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Atmel.Studio.Services;
 using Atmel.Studio.Services.Device;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
-using System.Linq;
 
 namespace FourWalledCubicle.StackChecker
 {
@@ -41,17 +29,19 @@ namespace FourWalledCubicle.StackChecker
 
         void mDebuggerEvents_OnEnterBreakMode(dbgEventReason Reason, ref dbgExecutionAction ExecutionAction)
         {
-            ulong stackStart = 0;
-            ulong stackCurrent = 0;
+            stackUsageProgress.Maximum = 0;
+            stackUsageProgress.Value = 0;
+            deviceName.Text = "N/A";
+            stackUsageVal.Text = "N/A";
 
             ITarget2 target = mTargetService.GetLaunchedTarget();
             IAddressSpace internalSRAMSpace;
             IMemorySegment internalSRAMSegment;
-            if (GetInternalSRAM(target, out internalSRAMSpace, out internalSRAMSegment) == true)
+            if (GetInternalSRAM(target, out internalSRAMSpace, out internalSRAMSegment))
             {
-                stackStart = internalSRAMSegment.Size;
+                ulong stackStart = internalSRAMSegment.Size;
+                ulong stackCurrent = stackStart;
 
-                stackCurrent = stackStart;
                 MemoryErrorRange[] errorRange;
                 byte[] result = target.GetMemory(
                     target.GetAddressSpaceName(internalSRAMSpace.Name),
@@ -65,16 +55,14 @@ namespace FourWalledCubicle.StackChecker
                         break;
                     }
                 }
+
+                stackUsageProgress.Maximum = stackStart;
+                stackUsageProgress.Value = (stackStart - stackCurrent);
+                deviceName.Text = target.Device.Name;
+                stackUsageVal.Text = string.Format("{0}/{1} ({2}%)",
+                    stackUsageProgress.Value.ToString(), stackUsageProgress.Maximum.ToString(),
+                    Math.Min(100, Math.Ceiling((100.0 * stackUsageProgress.Value) / stackUsageProgress.Maximum)));
             }
-
-            deviceName.Text = target.Device.Name;
-
-            stackUsageProgress.Maximum = stackStart;
-            stackUsageProgress.Value = (stackStart - stackCurrent);
-
-            stackUsageVal.Text = string.Format("{0}/{1} ({2}%)",
-                stackUsageProgress.Value.ToString(), stackUsageProgress.Maximum.ToString(),
-                Math.Min(100, Math.Ceiling((100.0 * stackUsageProgress.Value) / stackUsageProgress.Maximum)));
         }
 
         bool GetInternalSRAM(ITarget2 target, out IAddressSpace addressSpace, out IMemorySegment memorySegment)
