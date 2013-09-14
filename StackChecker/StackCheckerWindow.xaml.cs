@@ -22,13 +22,21 @@ namespace FourWalledCubicle.StackChecker
                 return;
 
             mDebuggerEvents = mDTE.Events.DebuggerEvents;
+            mDebuggerEvents.OnEnterRunMode += mDebuggerEvents_OnEnterRunMode;
             mDebuggerEvents.OnEnterBreakMode += mDebuggerEvents_OnEnterBreakMode;
 
             mTargetService = ATServiceProvider.TargetService2;
         }
 
+        void mDebuggerEvents_OnEnterRunMode(dbgEventReason Reason)
+        {
+            deviceName.Text = "(Break execution to refresh)";
+            stackUsageVal.Text = "(Break execution to refresh)";
+        }
+
         void mDebuggerEvents_OnEnterBreakMode(dbgEventReason Reason, ref dbgExecutionAction ExecutionAction)
         {
+            stackUsageProgress.IsEnabled = false;
             stackUsageProgress.Maximum = 0;
             stackUsageProgress.Value = 0;
             deviceName.Text = "N/A";
@@ -56,6 +64,7 @@ namespace FourWalledCubicle.StackChecker
                     }
                 }
 
+                stackUsageProgress.IsEnabled = true;
                 stackUsageProgress.Maximum = stackStart;
                 stackUsageProgress.Value = (stackStart - stackCurrent);
                 deviceName.Text = target.Device.Name;
