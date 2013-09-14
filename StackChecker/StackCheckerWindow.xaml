@@ -9,7 +9,7 @@
              MinHeight="90"
              Name="StackCheckerToolWindow"
              Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
-    <Grid>
+    <Grid VerticalAlignment="Center">
         <StackPanel Orientation="Vertical" Margin="10">
             <ProgressBar Height="30" Name="stackUsageProgress"/>
             <TextBlock Margin="0,5,0,0" >
