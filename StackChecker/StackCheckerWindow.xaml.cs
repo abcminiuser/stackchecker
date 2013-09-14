@@ -36,7 +36,6 @@ namespace FourWalledCubicle.StackChecker
 
         void mDebuggerEvents_OnEnterBreakMode(dbgEventReason Reason, ref dbgExecutionAction ExecutionAction)
         {
-            stackUsageProgress.IsEnabled = false;
             stackUsageProgress.Maximum = 0;
             stackUsageProgress.Value = 0;
             deviceName.Text = "N/A";
@@ -64,7 +63,6 @@ namespace FourWalledCubicle.StackChecker
                     }
                 }
 
-                stackUsageProgress.IsEnabled = true;
                 stackUsageProgress.Maximum = stackStart;
                 stackUsageProgress.Value = (stackStart - stackCurrent);
                 deviceName.Text = target.Device.Name;

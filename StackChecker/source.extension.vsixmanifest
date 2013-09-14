@@ -4,22 +4,18 @@
     <Name>StackChecker</Name>
     <Author>FourWalledCubicle</Author>
     <Version>1.0</Version>
-    <Description xml:space="preserve">Device maximum stack checker.</Description>
+    <Description xml:space="preserve">Maximum stack usage monitor, showing a visual and percentage of stack used in an application.</Description>
     <Locale>1033</Locale>
+    <License>License.txt</License>
+    <Icon>Gauge.png</Icon>
+    <PreviewImage>Preview.png</PreviewImage>
     <InstalledByMsi>false</InstalledByMsi>
     <SupportedProducts>
-      <VisualStudio Version="10.0">
-        <Edition>Pro</Edition>
-      </VisualStudio>
       <IsolatedShell Version="6.1">AtmelStudio</IsolatedShell>
     </SupportedProducts>
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />
   </Identifier>
-  <References>
-    <Reference Id="Microsoft.VisualStudio.MPF" MinVersion="10.0">
-      <Name>Visual Studio MPF</Name>
-    </Reference>
-  </References>
+  <References />
   <Content>
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
   </Content>
