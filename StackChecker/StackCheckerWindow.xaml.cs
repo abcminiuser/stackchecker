@@ -30,6 +30,8 @@ namespace FourWalledCubicle.StackChecker
 
         void mDebuggerEvents_OnEnterRunMode(dbgEventReason Reason)
         {
+            stackUsageProgress.Maximum = 0;
+            stackUsageProgress.Value = 0;
             deviceName.Text = "(Break execution to refresh)";
             stackUsageVal.Text = "(Break execution to refresh)";
         }
@@ -46,30 +48,32 @@ namespace FourWalledCubicle.StackChecker
             IMemorySegment internalSRAMSegment;
             if (GetInternalSRAM(target, out internalSRAMSpace, out internalSRAMSegment))
             {
-                ulong stackStart = internalSRAMSegment.Size;
-                ulong stackCurrent = stackStart;
+                stackUsageProgress.Maximum = internalSRAMSegment.Size;
+                stackUsageProgress.Value = GetMaximumStackUsage(target, internalSRAMSpace, internalSRAMSegment);
 
-                MemoryErrorRange[] errorRange;
-                byte[] result = target.GetMemory(
-                    target.GetAddressSpaceName(internalSRAMSpace.Name),
-                    internalSRAMSegment.Start, 1, (int)internalSRAMSegment.Size, 0, out errorRange);
-
-                for (int i = (result.Length - 1); i >= 0; i -= 4)
-                {
-                    if ((result[i - 0] == 0xDC) && (result[i - 1] == 0xDC) && (result[i - 2] == 0xDC) && (result[i - 3] == 0xDC))
-                    {
-                        stackCurrent = (ulong)i;
-                        break;
-                    }
-                }
-
-                stackUsageProgress.Maximum = stackStart;
-                stackUsageProgress.Value = (stackStart - stackCurrent);
                 deviceName.Text = target.Device.Name;
                 stackUsageVal.Text = string.Format("{0}/{1} ({2}%)",
                     stackUsageProgress.Value.ToString(), stackUsageProgress.Maximum.ToString(),
                     Math.Min(100, Math.Ceiling((100.0 * stackUsageProgress.Value) / stackUsageProgress.Maximum)));
             }
+        }
+
+        ulong GetMaximumStackUsage(ITarget2 target, IAddressSpace addressSpace, IMemorySegment memorySegment)
+        {
+            for (ulong i = 0; i < memorySegment.Size; i++)
+            {
+                MemoryErrorRange[] errorRange;
+                byte[] result = target.GetMemory(
+                    target.GetAddressSpaceName(addressSpace.Name),
+                    (memorySegment.EndAddress - ((i + 1) * 4)), 1, 4, 0, out errorRange);
+
+                if ((result[0] == 0xDC) && (result[1] == 0xDC) && (result[2] == 0xDC) && (result[3] == 0xDC))
+                {
+                    return (i * 4);
+                }
+            }
+
+            return memorySegment.Size;
         }
 
         bool GetInternalSRAM(ITarget2 target, out IAddressSpace addressSpace, out IMemorySegment memorySegment)
