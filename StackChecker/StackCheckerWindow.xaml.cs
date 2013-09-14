@@ -67,6 +67,8 @@ namespace FourWalledCubicle.StackChecker
                 }
             }
 
+            deviceName.Text = target.Device.Name;
+
             stackUsageProgress.Maximum = stackStart;
             stackUsageProgress.Value = (stackStart - stackCurrent);
 
