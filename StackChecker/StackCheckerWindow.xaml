@@ -19,11 +19,10 @@
                 <Run FontWeight="Bold">Maximum Stack Usage:</Run> <Run Name="stackUsageVal">N/A</Run>
                 </TextBlock>
 
-                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Name="addInstrumentCode" ToolTip="Add stack instrumenting code to project" Click="addInstrumentCode_Click" Focusable="False">
-                    <Image Width="16" Height="16" Source="/StackChecker;component/Resources/GaugeIcon.png"/>
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Name="addInstrumentCode" ToolTip="Add stack instrumenting code to project" Click="addInstrumentCode_Click" Focusable="False" Height="24" Width="24">
+                    <Image Width="16" Height="16" Source="/StackChecker;component/Resources/AddFileIcon.png"/>
                 </Button>
             </DockPanel>
-
         </StackPanel>
     </Grid>
 </UserControl>
