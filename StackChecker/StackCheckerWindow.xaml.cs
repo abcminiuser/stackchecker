@@ -181,7 +181,8 @@ namespace FourWalledCubicle.StackChecker
 
                     if ((seg.Name.IndexOf("IRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
                         (seg.Name.IndexOf("INTERNAL_SRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (seg.Name.IndexOf("INTRAM0", StringComparison.OrdinalIgnoreCase) >= 0))
+                        (seg.Name.IndexOf("INTRAM0", StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (seg.Name.IndexOf("HRAMC0", StringComparison.OrdinalIgnoreCase) >= 0))
                     {
                         addressSpace = mem;
                         memorySegment = seg;
