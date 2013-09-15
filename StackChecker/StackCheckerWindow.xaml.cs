@@ -1,15 +1,18 @@
 ﻿using System;
+using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using Atmel.Studio.Services;
 using Atmel.Studio.Services.Device;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
-using System.Windows;
 
 namespace FourWalledCubicle.StackChecker
 {
     public partial class StackCheckerWindow : UserControl
     {
+        private const string STACK_INSTRUMENT_FILENAME = "_StackInstrument.c";
+
         private DTE mDTE;
         private DebuggerEvents mDebuggerEvents;
         private ITargetService2 mTargetService;
@@ -43,16 +46,32 @@ namespace FourWalledCubicle.StackChecker
             foreach (String projectName in (Array)solutionBuild.StartupProjects)
             {
                 Project project = mDTE.Solution.Projects.Item(projectName);
+                if (project == null)
+                    return;
 
                 try
                 {
-                    string instrumentFileLocation = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "_StackInstrument.c");
+                    string instrumentFileLocation = Path.Combine(Path.GetTempPath(), STACK_INSTRUMENT_FILENAME);
 
-                    System.IO.StreamWriter instrumentCode = new System.IO.StreamWriter(instrumentFileLocation);
+                    StreamWriter instrumentCode = new StreamWriter(instrumentFileLocation);
                     instrumentCode.Write(StackChecker.Resources.InstrumentationCode);
                     instrumentCode.Close();
 
+                    ProjectItem existingInstrumentCode = project.ProjectItems.Item(STACK_INSTRUMENT_FILENAME);
+                    if (existingInstrumentCode != null)
+                        existingInstrumentCode.Document.Close();
+
                     project.ProjectItems.AddFromFileCopy(instrumentFileLocation);
+                    project.ProjectItems.Item(STACK_INSTRUMENT_FILENAME).Open(Constants.vsViewKindCode).Visible = true;
+
+                    if (existingInstrumentCode == null)
+                    {
+                        ATServiceProvider.DialogService.ShowDialog(
+                            null,
+                            "Instrumenting code has been added to your project as a new source file." + Environment.NewLine + "Please recompile your project to enable.",
+                            "Stack Checker - Instrumenting Code Added",
+                            DialogButtonSet.Ok, DialogIcon.Information);
+                    }
                 }
                 catch { }
             }
