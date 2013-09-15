@@ -49,7 +49,7 @@ namespace FourWalledCubicle.StackChecker
                     instrumentCode.Write(StackChecker.Resources.InstrumentationCode);
                     instrumentCode.Close();
 
-                    project.ProjectItems.AddFromFile(instrumentFileLocation);
+                    project.ProjectItems.AddFromFileCopy(instrumentFileLocation);
                 }
                 catch { }
             }
