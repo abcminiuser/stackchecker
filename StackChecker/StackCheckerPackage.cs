@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Shell;
 namespace FourWalledCubicle.StackChecker
 {
     [PackageRegistration(UseManagedResourcesOnly = true)]
-    [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
+    [InstalledProductRegistration("#110", "#112", "1.0")]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(StackCheckerToolWindow))]
     [Guid(GuidList.guidStackCheckerPkgString)]

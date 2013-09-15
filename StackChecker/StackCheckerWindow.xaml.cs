@@ -22,12 +22,12 @@ namespace FourWalledCubicle.StackChecker
             if (mDTE == null)
                 return;
 
+            mTargetService = ATServiceProvider.TargetService2;
+
             mDebuggerEvents = mDTE.Events.DebuggerEvents;
             mDebuggerEvents.OnEnterRunMode += mDebuggerEvents_OnEnterRunMode;
             mDebuggerEvents.OnEnterBreakMode += mDebuggerEvents_OnEnterBreakMode;
             mDebuggerEvents.OnEnterDesignMode += mDebuggerEvents_OnEnterDesignMode;
-
-            mTargetService = ATServiceProvider.TargetService2;
 
             UpdateUI();
         }
@@ -83,33 +83,27 @@ namespace FourWalledCubicle.StackChecker
 
         void UpdateUI()
         {
+            stackUsageProgress.Maximum = 100;
+            stackUsageProgress.Value = 0;
+
+            deviceName.FontStyle = FontStyles.Italic;
+            stackUsageVal.FontStyle = FontStyles.Italic;
+
             switch (mDTE.Debugger.CurrentMode)
             {
                 case dbgDebugMode.dbgBreakMode:
-                    stackUsageProgress.Maximum = 100;
-                    stackUsageProgress.Value = 0;
                     deviceName.Text = "(Refresh Required)";
                     stackUsageVal.Text = "(Refresh Required)";
-                    deviceName.FontStyle = FontStyles.Italic;
-                    stackUsageVal.FontStyle = FontStyles.Italic;
                     break;
 
                 case dbgDebugMode.dbgRunMode:
-                    stackUsageProgress.Maximum = 100;
-                    stackUsageProgress.Value = 0;
                     deviceName.Text = "(Target is running)";
                     stackUsageVal.Text = "(Target is running)";
-                    deviceName.FontStyle = FontStyles.Italic;
-                    stackUsageVal.FontStyle = FontStyles.Italic;
                     break;
 
                 default:
-                    stackUsageProgress.Maximum = 100;
-                    stackUsageProgress.Value = 0;
                     deviceName.Text = "(Not in Debug Session)";
                     stackUsageVal.Text = "(Not in Debug Session)";
-                    deviceName.FontStyle = FontStyles.Italic;
-                    stackUsageVal.FontStyle = FontStyles.Italic;
                     break;
             }
         }
@@ -149,48 +143,48 @@ namespace FourWalledCubicle.StackChecker
                     target.GetAddressSpaceName(addressSpace.Name),
                     memorySegment.Start, 1, (int)memorySegment.Size, 0, out errorRange);
 
-                int start = -1;
-                int end = -1;
+                ulong? start = null;
+                ulong? end = null;
 
                 for (int i = (result.Length - 1); i >= 0; i -= 4)
                 {
                     if ((result[i - 0] == 0xDC) && (result[i - 1] == 0xDC) && (result[i - 2] == 0xDC) && (result[i - 3] == 0xDC))
                     {
-                        if (start < 0)
-                            start = i;
+                        if (start.HasValue == false)
+                            start = (ulong)i;
                     }
-                    else if (start >= 0)
+                    else if (start.HasValue)
                     {
-                        end = i;
+                        end = (ulong)i;
                         break;
                     }
                 }
 
-                current = memorySegment.Size - (ulong)start;
-                max = memorySegment.Size - (ulong)end;
+                current = memorySegment.Size - (start ?? 0);
+                max = memorySegment.Size - (end ?? 0);
             }
             catch
             {
                 current = 0;
-                max = memorySegment.Size;            
+                max = memorySegment.Size;
             }
         }
 
         bool GetInternalSRAM(ITarget2 target, out IAddressSpace addressSpace, out IMemorySegment memorySegment)
         {
-            foreach (IAddressSpace a in target.Device.AddressSpaces)
+            foreach (IAddressSpace mem in target.Device.AddressSpaces)
             {
-                foreach (IMemorySegment s in a.MemorySegments)
+                foreach (IMemorySegment seg in mem.MemorySegments)
                 {
-                    if (s.Type.IndexOf("RAM", StringComparison.OrdinalIgnoreCase) < 0)
+                    if (seg.Type.IndexOf("RAM", StringComparison.OrdinalIgnoreCase) < 0)
                         continue;
 
-                    if ((s.Name.IndexOf("IRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (s.Name.IndexOf("INTERNAL_SRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (s.Name.IndexOf("INTRAM0", StringComparison.OrdinalIgnoreCase) >= 0))
+                    if ((seg.Name.IndexOf("IRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (seg.Name.IndexOf("INTERNAL_SRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (seg.Name.IndexOf("INTRAM0", StringComparison.OrdinalIgnoreCase) >= 0))
                     {
-                        addressSpace = a;
-                        memorySegment = s;
+                        addressSpace = mem;
+                        memorySegment = seg;
                         return true;
                     }
                 }
