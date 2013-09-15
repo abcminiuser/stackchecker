@@ -70,16 +70,24 @@ namespace FourWalledCubicle.StackChecker {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to void _StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (&quot;.init1&quot;)));
-        ///void _StackPaint(void)
-        ///{
-        ///	extern void* _end, __stack;
-        ///	uint8_t *p = &amp;_end;
+        ///   Looks up a localized string similar to /**
+        /// *  \brief Stack checker extension utility file.
+        /// *
+        /// *  This file has been automatically added to your project by the Stack Checker
+        /// *  Atmel Studio extension. If you are not currently using this extension, this
+        /// *  file may be removed from your project.
+        /// */
         ///
-        ///	while (p &lt;= &amp;__stack)
-        ///	  *(p++) = 0xDC;
-        ///}
-        ///.
+        ///#include &lt;stdint.h&gt;
+        ///
+        ///#ifndef __GNUC__
+        ///#  error  The stack instrumentation code is designed for GCC toolchains only.
+        ///#endif
+        ///
+        ////** Linker provided symbols for the end of the static data section, and the
+        /// *  of the stack.
+        /// */
+        ///extern vo [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string InstrumentationCode {
             get {
