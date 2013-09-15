@@ -25,8 +25,11 @@ namespace FourWalledCubicle.StackChecker
             mDebuggerEvents = mDTE.Events.DebuggerEvents;
             mDebuggerEvents.OnEnterRunMode += mDebuggerEvents_OnEnterRunMode;
             mDebuggerEvents.OnEnterBreakMode += mDebuggerEvents_OnEnterBreakMode;
+            mDebuggerEvents.OnEnterDesignMode += mDebuggerEvents_OnEnterDesignMode;
 
             mTargetService = ATServiceProvider.TargetService2;
+
+            UpdateUI();
         }
 
         private void addInstrumentCode_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -55,26 +58,60 @@ namespace FourWalledCubicle.StackChecker
             }
         }
 
-        void mDebuggerEvents_OnEnterRunMode(dbgEventReason Reason)
+        private void refreshUsage_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            stackUsageProgress.Maximum = 100;
-            stackUsageProgress.Value = 0;
-            deviceName.Text = "(Break to refresh)";
-            stackUsageVal.Text = "(Break to refresh)";
-            deviceName.FontStyle = FontStyles.Italic;
-            stackUsageVal.FontStyle = FontStyles.Italic;
+            UpdateUI();
+
+            if (mDTE.Debugger.CurrentMode == dbgDebugMode.dbgBreakMode)
+                Dispatcher.Invoke(new Action(UpdateStackUsageInfo));
         }
 
-        void mDebuggerEvents_OnEnterBreakMode(dbgEventReason Reason, ref dbgExecutionAction ExecutionAction)
+        void mDebuggerEvents_OnEnterRunMode(dbgEventReason Reason)
         {
-            stackUsageProgress.Maximum = 100;
-            stackUsageProgress.Value = 0;
-            deviceName.Text = "N/A";
-            stackUsageVal.Text = "N/A";
-            deviceName.FontStyle = FontStyles.Normal;
-            stackUsageVal.FontStyle = FontStyles.Normal;
+            UpdateUI();
+        }
 
-            UpdateStackUsageInfo();
+        void mDebuggerEvents_OnEnterBreakMode(dbgEventReason Reason, ref dbgExecutionAction execAction)
+        {
+            UpdateUI();
+        }
+
+        void mDebuggerEvents_OnEnterDesignMode(dbgEventReason Reason)
+        {
+            UpdateUI();
+        }
+
+        void UpdateUI()
+        {
+            switch (mDTE.Debugger.CurrentMode)
+            {
+                case dbgDebugMode.dbgBreakMode:
+                    stackUsageProgress.Maximum = 100;
+                    stackUsageProgress.Value = 0;
+                    deviceName.Text = "(Refresh Required)";
+                    stackUsageVal.Text = "(Refresh Required)";
+                    deviceName.FontStyle = FontStyles.Italic;
+                    stackUsageVal.FontStyle = FontStyles.Italic;
+                    break;
+
+                case dbgDebugMode.dbgRunMode:
+                    stackUsageProgress.Maximum = 100;
+                    stackUsageProgress.Value = 0;
+                    deviceName.Text = "(Target is running)";
+                    stackUsageVal.Text = "(Target is running)";
+                    deviceName.FontStyle = FontStyles.Italic;
+                    stackUsageVal.FontStyle = FontStyles.Italic;
+                    break;
+
+                default:
+                    stackUsageProgress.Maximum = 100;
+                    stackUsageProgress.Value = 0;
+                    deviceName.Text = "(Not in Debug Session)";
+                    stackUsageVal.Text = "(Not in Debug Session)";
+                    deviceName.FontStyle = FontStyles.Italic;
+                    stackUsageVal.FontStyle = FontStyles.Italic;
+                    break;
+            }
         }
 
         void UpdateStackUsageInfo()
@@ -92,6 +129,9 @@ namespace FourWalledCubicle.StackChecker
 
                 stackUsageProgress.Maximum = maxUsage;
                 stackUsageProgress.Value = currentUsage;
+
+                deviceName.FontStyle = FontStyles.Normal;
+                stackUsageVal.FontStyle = FontStyles.Normal;
 
                 deviceName.Text = target.Device.Name;
                 stackUsageVal.Text = string.Format("{0}/{1} ({2}%)",
