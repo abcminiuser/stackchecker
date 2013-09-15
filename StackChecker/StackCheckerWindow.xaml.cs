@@ -82,8 +82,11 @@ namespace FourWalledCubicle.StackChecker
             IMemorySegment internalSRAMSegment;
             if (GetInternalSRAM(target, out internalSRAMSpace, out internalSRAMSegment))
             {
-                stackUsageProgress.Maximum = internalSRAMSegment.Size;
-                stackUsageProgress.Value = GetMaximumStackUsage(target, internalSRAMSpace, internalSRAMSegment);
+                ulong currentUsage, maxUsage;
+                GetStackUsage(target, internalSRAMSpace, internalSRAMSegment, out currentUsage, out maxUsage);
+
+                stackUsageProgress.Maximum = maxUsage;
+                stackUsageProgress.Value = currentUsage;
 
                 deviceName.Text = target.Device.Name;
                 stackUsageVal.Text = string.Format("{0}/{1} ({2}%)",
@@ -92,7 +95,7 @@ namespace FourWalledCubicle.StackChecker
             }
         }
 
-        ulong GetMaximumStackUsage(ITarget2 target, IAddressSpace addressSpace, IMemorySegment memorySegment)
+        void GetStackUsage(ITarget2 target, IAddressSpace addressSpace, IMemorySegment memorySegment, out ulong current, out ulong max)
         {
             try
             {
@@ -101,17 +104,31 @@ namespace FourWalledCubicle.StackChecker
                     target.GetAddressSpaceName(addressSpace.Name),
                     memorySegment.Start, 1, (int)memorySegment.Size, 0, out errorRange);
 
+                int start = -1;
+                int end = -1;
+
                 for (int i = (result.Length - 1); i >= 0; i -= 4)
                 {
                     if ((result[i - 0] == 0xDC) && (result[i - 1] == 0xDC) && (result[i - 2] == 0xDC) && (result[i - 3] == 0xDC))
                     {
-                        return (memorySegment.Size - (ulong)i);
+                        if (start < 0)
+                            start = i;
+                    }
+                    else if (start >= 0)
+                    {
+                        end = i;
+                        break;
                     }
                 }
-            }
-            catch { }
 
-            return memorySegment.Size;
+                current = memorySegment.Size - (ulong)start;
+                max = memorySegment.Size - (ulong)end;
+            }
+            catch
+            {
+                current = 0;
+                max = memorySegment.Size;            
+            }
         }
 
         bool GetInternalSRAM(ITarget2 target, out IAddressSpace addressSpace, out IMemorySegment memorySegment)
