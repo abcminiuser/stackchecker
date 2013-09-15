@@ -4,6 +4,7 @@ using Atmel.Studio.Services;
 using Atmel.Studio.Services.Device;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
+using System.Windows;
 
 namespace FourWalledCubicle.StackChecker
 {
@@ -58,8 +59,10 @@ namespace FourWalledCubicle.StackChecker
         {
             stackUsageProgress.Maximum = 100;
             stackUsageProgress.Value = 0;
-            deviceName.Text = "(Break execution to refresh)";
-            stackUsageVal.Text = "(Break execution to refresh)";
+            deviceName.Text = "(Break to refresh)";
+            stackUsageVal.Text = "(Break to refresh)";
+            deviceName.FontStyle = FontStyles.Italic;
+            stackUsageVal.FontStyle = FontStyles.Italic;
         }
 
         void mDebuggerEvents_OnEnterBreakMode(dbgEventReason Reason, ref dbgExecutionAction ExecutionAction)
@@ -68,8 +71,10 @@ namespace FourWalledCubicle.StackChecker
             stackUsageProgress.Value = 0;
             deviceName.Text = "N/A";
             stackUsageVal.Text = "N/A";
+            deviceName.FontStyle = FontStyles.Normal;
+            stackUsageVal.FontStyle = FontStyles.Normal;
 
-            Dispatcher.Invoke(new Action(() => UpdateStackUsageInfo()));
+            UpdateStackUsageInfo();
         }
 
         void UpdateStackUsageInfo()
@@ -137,8 +142,12 @@ namespace FourWalledCubicle.StackChecker
             {
                 foreach (IMemorySegment s in a.MemorySegments)
                 {
-                    if ((s.Type.IndexOf("RAM", StringComparison.OrdinalIgnoreCase) >= 0) &&
-                        (s.Name.IndexOf("INTERNAL", StringComparison.OrdinalIgnoreCase) >= 0))
+                    if (s.Type.IndexOf("RAM", StringComparison.OrdinalIgnoreCase) < 0)
+                        continue;
+
+                    if ((s.Name.IndexOf("IRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (s.Name.IndexOf("INTERNAL_SRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (s.Name.IndexOf("INTRAM0", StringComparison.OrdinalIgnoreCase) >= 0))
                     {
                         addressSpace = a;
                         memorySegment = s;
