@@ -37,9 +37,7 @@ namespace FourWalledCubicle.StackChecker
 
         private void addInstrumentCode_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            string startupProjectName = string.Empty;
             SolutionBuild solutionBuild = mDTE.Solution.SolutionBuild;
-
             if ((solutionBuild == null) || (solutionBuild.StartupProjects == null))
                 return;
 
@@ -81,6 +79,24 @@ namespace FourWalledCubicle.StackChecker
         {
             UpdateUI();
 
+            SolutionBuild solutionBuild = mDTE.Solution.SolutionBuild;
+            if ((solutionBuild != null) && (solutionBuild.StartupProjects != null))
+            {
+                foreach (String projectName in (Array)solutionBuild.StartupProjects)
+                {
+                    Project project = mDTE.Solution.Projects.Item(projectName);
+                    if (project == null)
+                        return;
+
+                    if (project.ProjectItems.Item(STACK_INSTRUMENT_FILENAME) == null)
+                    {
+                        deviceName.Text = "(Missing Instrumentation)";
+                        stackUsageVal.Text = "(Missing Instrumentation)";
+                        return;
+                    }
+                }
+            }
+
             if (mDTE.Debugger.CurrentMode == dbgDebugMode.dbgBreakMode)
                 Dispatcher.Invoke(new Action(UpdateStackUsageInfo));
         }
@@ -116,8 +132,8 @@ namespace FourWalledCubicle.StackChecker
                     break;
 
                 case dbgDebugMode.dbgRunMode:
-                    deviceName.Text = "(Target is running)";
-                    stackUsageVal.Text = "(Target is running)";
+                    deviceName.Text = "(Target Running)";
+                    stackUsageVal.Text = "(Target Running)";
                     break;
 
                 default:
