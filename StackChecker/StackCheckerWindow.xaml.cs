@@ -167,6 +167,11 @@ namespace FourWalledCubicle.StackChecker
                     stackUsageProgress.Value.ToString(), stackUsageProgress.Maximum.ToString(),
                     Math.Min(100, Math.Ceiling((100.0 * stackUsageProgress.Value) / stackUsageProgress.Maximum)));
             }
+            else
+            {
+                deviceName.Text = target.Device.Name;
+                stackUsageVal.Text = "(Unsupported Device)";
+            }
         }
 
         void GetStackUsage(ITarget2 target, IAddressSpace addressSpace, IMemorySegment memorySegment, out ulong current, out ulong max)
@@ -207,6 +212,12 @@ namespace FourWalledCubicle.StackChecker
 
         bool GetInternalSRAM(ITarget2 target, out IAddressSpace addressSpace, out IMemorySegment memorySegment)
         {
+            addressSpace = null;
+            memorySegment = null;
+
+            if (target.Device.Architecture.StartsWith("AVR8") == false)
+                return false;
+
             foreach (IAddressSpace mem in target.Device.AddressSpaces)
             {
                 foreach (IMemorySegment seg in mem.MemorySegments)
@@ -215,9 +226,7 @@ namespace FourWalledCubicle.StackChecker
                         continue;
 
                     if ((seg.Name.IndexOf("IRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (seg.Name.IndexOf("INTERNAL_SRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (seg.Name.IndexOf("INTRAM0", StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (seg.Name.IndexOf("HRAMC0", StringComparison.OrdinalIgnoreCase) >= 0))
+                        (seg.Name.IndexOf("INTERNAL_SRAM", StringComparison.OrdinalIgnoreCase) >= 0))
                     {
                         addressSpace = mem;
                         memorySegment = seg;
@@ -226,8 +235,6 @@ namespace FourWalledCubicle.StackChecker
                 }
             }
 
-            addressSpace = null;
-            memorySegment = null;
             return false;
         }
     }

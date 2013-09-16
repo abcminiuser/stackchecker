@@ -9,7 +9,11 @@
 #include <stdint.h>
 
 #ifndef __GNUC__
-#  error  The stack instrumentation code is designed for GCC toolchains only.
+#  error The stack instrumentation code is designed for GCC toolchains only.
+#endif
+
+#ifndef __AVR__
+#  error The stack instumentation code is intended for AVR 8-bit targets only.
 #endif
 
 /** Linker provided symbols for the end of the static data section, and the
