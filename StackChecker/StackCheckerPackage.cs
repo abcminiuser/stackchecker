@@ -11,7 +11,7 @@ namespace FourWalledCubicle.StackChecker
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", "1.0")]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideToolWindow(typeof(StackCheckerToolWindow))]
+    [ProvideToolWindow(typeof(StackCheckerToolWindow), Height=70, Width=300, Style=VsDockStyle.Float)]
     [Guid(GuidList.guidStackCheckerPkgString)]
     public sealed class StackCheckerPackage : Package
     {

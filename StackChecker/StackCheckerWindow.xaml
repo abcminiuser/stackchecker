@@ -5,14 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
              mc:Ignorable="d" 
-             d:DesignHeight="90" d:DesignWidth="300"
-             MinHeight="90"
+             d:DesignHeight="70" d:DesignWidth="300"
+             MinHeight="70"
              Name="StackCheckerToolWindow"
              Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
-    <Grid VerticalAlignment="Center" MinHeight="90">
+    <Grid VerticalAlignment="Center" MinHeight="70">
         <StackPanel Orientation="Vertical" Margin="10">
-            <ProgressBar Height="30" Name="stackUsageProgress"/>
-            <DockPanel Margin="0,5,0,0">
+            <DockPanel>
                 <TextBlock>
                 <Run FontWeight="Bold">Device Name:</Run> <Run Name="deviceName">N/A</Run>
                 <LineBreak/>
@@ -26,6 +25,7 @@
                     <Image Width="16" Height="16" Source="/StackChecker;component/Resources/AddFileIcon.png"/>
                 </Button>
             </DockPanel>
+            <ProgressBar Margin="0,5,0,0" Height="15" Name="stackUsageProgress"/>
         </StackPanel>
     </Grid>
 </UserControl>
