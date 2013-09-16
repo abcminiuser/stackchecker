@@ -4,8 +4,9 @@
     <Name>StackChecker</Name>
     <Author>FourWalledCubicle</Author>
     <Version>1.0</Version>
-    <Description xml:space="preserve">Maximum stack usage monitor, showing a visual and percentage of stack used in an application.</Description>
+    <Description xml:space="preserve">For AVR8 architecture devices only. Maximum stack usage monitor, showing a visual and percentage of stack used in an application.</Description>
     <Locale>1033</Locale>
+    <MoreInfoUrl>http://www.fourwalledcubicle.com</MoreInfoUrl>
     <License>License.txt</License>
     <Icon>Gauge.png</Icon>
     <PreviewImage>Preview.png</PreviewImage>
