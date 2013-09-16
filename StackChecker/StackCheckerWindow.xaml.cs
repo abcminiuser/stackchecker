@@ -101,6 +101,22 @@ namespace FourWalledCubicle.StackChecker
                 Dispatcher.Invoke(new Action(UpdateStackUsageInfo));
         }
 
+        private void helpInfo_Click(object sender, RoutedEventArgs e)
+        {
+            ATServiceProvider.DialogService.ShowDialog(
+                null,
+                "This stack checker shows the maximum stack usage of your application, based on the currently " +
+                "running debug session. It is not guaranteed to be an upper bound; the value shown is the high " +
+                "water mark for the current debug session only." +
+                Environment.NewLine + Environment.NewLine +
+                "To use, click the Add Instrumentation button, recompile and run your project. Pause execution " +
+                "and click the Refresh button to determine the current stack high water mark." +
+                Environment.NewLine + Environment.NewLine +
+                "Currently only 8-bit AVR devices (TINY/MEGA/XMEGA) are supported.",
+                "Stack Checker - Usage",
+                DialogButtonSet.Ok, DialogIcon.Information);
+        }
+
         void mDebuggerEvents_OnEnterRunMode(dbgEventReason Reason)
         {
             UpdateUI();

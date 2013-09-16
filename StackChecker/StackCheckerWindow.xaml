@@ -23,6 +23,9 @@
                 <Button Margin="0,0,5,0" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Name="addInstrumentCode" ToolTip="Add stack instrumenting code to project" Click="addInstrumentCode_Click" Focusable="False" Height="24" Width="24">
                     <Image Width="16" Height="16" Source="/StackChecker;component/Resources/AddFileIcon.png"/>
                 </Button>
+                <Button Margin="0,0,5,0" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Name="helpInfo" ToolTip="Help" Click="helpInfo_Click" Focusable="False" Height="24" Width="24">
+                    <Image Width="16" Height="16" Source="/StackChecker;component/Resources/HelpIcon.png"/>
+                </Button>
             </DockPanel>
             <ProgressBar Margin="0,5,0,0" Height="15" Name="stackUsageProgress"/>
         </StackPanel>

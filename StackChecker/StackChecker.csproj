@@ -170,6 +170,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Resource Include="Resources\HelpIcon.png" />
     <Resource Include="Resources\RefreshIcon.png" />
     <Resource Include="Resources\AddFileIcon.png" />
     <Resource Include="Resources\InstrumentationCode.c" />
