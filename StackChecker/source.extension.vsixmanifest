@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
   <Identifier Id="fbc19046-ee56-4aa8-be8e-3998149b311a">
-    <Name>StackChecker</Name>
+    <Name>Maximum Stack Usage Checker</Name>
     <Author>FourWalledCubicle</Author>
     <Version>1.0</Version>
     <Description xml:space="preserve">For AVR8 architecture devices only. Maximum stack usage monitor, showing a visual and percentage of stack used in an application.</Description>
