@@ -6,6 +6,7 @@ using Atmel.Studio.Services;
 using Atmel.Studio.Services.Device;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
+using System.Threading;
 
 namespace FourWalledCubicle.StackChecker
 {
@@ -17,6 +18,8 @@ namespace FourWalledCubicle.StackChecker
         private DTE mDTE;
         private DebuggerEvents mDebuggerEvents;
         private ITargetService2 mTargetService;
+
+        private System.Threading.Thread mStackCalcThread = null;
 
         public StackCheckerWindow()
         {
@@ -78,6 +81,9 @@ namespace FourWalledCubicle.StackChecker
 
         private void refreshUsage_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            if ((mStackCalcThread != null) && mStackCalcThread.IsAlive)
+                return;
+
             UpdateUI();
 
             SolutionBuild solutionBuild = mDTE.Solution.SolutionBuild;
@@ -99,7 +105,10 @@ namespace FourWalledCubicle.StackChecker
             }
 
             if (mDTE.Debugger.CurrentMode == dbgDebugMode.dbgBreakMode)
-                Dispatcher.Invoke(new Action(UpdateStackUsageInfo));
+            {
+                mStackCalcThread = new System.Threading.Thread(UpdateStackUsageInfo);
+                mStackCalcThread.Start();
+            }
         }
 
         private void helpInfo_Click(object sender, RoutedEventArgs e)
@@ -171,23 +180,39 @@ namespace FourWalledCubicle.StackChecker
             if (GetInternalSRAM(target, out internalSRAMSpace, out internalSRAMSegment))
             {
                 ulong currentUsage, maxUsage;
+
+                Dispatcher.Invoke(new Action(
+                () =>
+                {
+                    stackUsageProgress.IsIndeterminate = true;
+                    deviceName.Text = target.Device.Name;
+                    deviceName.FontStyle = FontStyles.Normal;
+                    stackUsageVal.Text = "(Calculating...)";
+                }));
+
                 GetStackUsage(target, internalSRAMSpace, internalSRAMSegment, out currentUsage, out maxUsage);
 
-                stackUsageProgress.Maximum = maxUsage;
-                stackUsageProgress.Value = currentUsage;
+                Dispatcher.Invoke(new Action(
+                    () =>
+                    {
+                        stackUsageProgress.IsIndeterminate = false;
+                        stackUsageProgress.Maximum = maxUsage;
+                        stackUsageProgress.Value = currentUsage;
 
-                deviceName.FontStyle = FontStyles.Normal;
-                stackUsageVal.FontStyle = FontStyles.Normal;
-
-                deviceName.Text = target.Device.Name;
-                stackUsageVal.Text = string.Format("{0}/{1} ({2}%)",
-                    stackUsageProgress.Value.ToString(), stackUsageProgress.Maximum.ToString(),
-                    Math.Min(100, Math.Ceiling((100.0 * stackUsageProgress.Value) / stackUsageProgress.Maximum)));
+                        stackUsageVal.FontStyle = FontStyles.Normal;
+                        stackUsageVal.Text = string.Format("{0}/{1} ({2}%)",
+                            stackUsageProgress.Value.ToString(), stackUsageProgress.Maximum.ToString(),
+                            Math.Min(100, Math.Ceiling((100.0 * stackUsageProgress.Value) / stackUsageProgress.Maximum)));
+                    }));
             }
             else
             {
-                deviceName.Text = target.Device.Name;
-                stackUsageVal.Text = "(Unsupported Device)";
+                Dispatcher.Invoke(new Action(
+                    () =>
+                    {
+                        deviceName.Text = target.Device.Name;
+                        stackUsageVal.Text = "(Unsupported Device)";
+                    }));
             }
         }
 
