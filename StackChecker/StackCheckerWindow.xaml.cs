@@ -204,7 +204,7 @@ namespace FourWalledCubicle.StackChecker
 
                 for (int i = (result.Length - 1); i >= 0; i -= 4)
                 {
-                    if ((result[i - 0] == 0xDC) && (result[i - 1] == 0xDC) && (result[i - 2] == 0xDC) && (result[i - 3] == 0xDC))
+                    if ((result[i - 3] == 0xDE) && (result[i - 2] == 0xAD) && (result[i - 1] == 0xBE) && (result[i - 0] == 0xEF))
                     {
                         if (start.HasValue == false)
                             start = (ulong)i;
