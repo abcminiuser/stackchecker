@@ -12,6 +12,7 @@ namespace FourWalledCubicle.StackChecker
     public partial class StackCheckerWindow : UserControl
     {
         private const string STACK_INSTRUMENT_FILENAME = "_StackInstrument.c";
+        private readonly byte[] STACK_INSTRUMENT_PATTERN = { 0xDE, 0xAD, 0xBE, 0xEF };
 
         private DTE mDTE;
         private DebuggerEvents mDebuggerEvents;
@@ -202,16 +203,19 @@ namespace FourWalledCubicle.StackChecker
                 ulong? start = null;
                 ulong? end = null;
 
-                for (int i = (result.Length - 1); i >= 0; i -= 4)
+                for (ulong i = (ulong)(result.Length - 1); i >= 4; i -= 4)
                 {
-                    if ((result[i - 3] == 0xDE) && (result[i - 2] == 0xAD) && (result[i - 1] == 0xBE) && (result[i - 0] == 0xEF))
+                    if ((result[i - 3] == STACK_INSTRUMENT_PATTERN[0]) &&
+                        (result[i - 2] == STACK_INSTRUMENT_PATTERN[1]) &&
+                        (result[i - 1] == STACK_INSTRUMENT_PATTERN[2]) &&
+                        (result[i - 0] == STACK_INSTRUMENT_PATTERN[3]))
                     {
                         if (start.HasValue == false)
-                            start = (ulong)i;
+                            start = (i + 1);
                     }
                     else if (start.HasValue)
                     {
-                        end = (ulong)i;
+                        end = (i + 1);
                         break;
                     }
                 }
