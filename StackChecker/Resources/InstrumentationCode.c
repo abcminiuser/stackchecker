@@ -36,8 +36,8 @@ void _StackPaint(void)
 	uint8_t *fill_start = (uint8_t*)&_end;
 	uint8_t *fill_end = (uint8_t*)&__stack;
 
-	for (uint8_t* fill_pos = fill_start; fill < fill_end; fill++)
+	for (uint8_t* fill_pos = fill_start; fill_pos < fill_end; fill_pos++)
 	{
-		*fill_pos = fill_pattern[(uintptr_t)fill & 0x03];
+		*fill_pos = fill_pattern[(uintptr_t)fill_pos & 0x03];
 	}
 }
