@@ -36,11 +36,11 @@ namespace FourWalledCubicle.StackChecker
                     instrumentCode.Close();
 
                     ProjectItem existingInstrumentCode = project.ProjectItems.Item(STACK_INSTRUMENT_FILENAME);
-                    if (existingInstrumentCode != null)
+                    if ((existingInstrumentCode != null) && (existingInstrumentCode.Document != null))
                         existingInstrumentCode.Document.Close();
 
-                    project.ProjectItems.AddFromFileCopy(instrumentFileLocation);
-                    project.ProjectItems.Item(STACK_INSTRUMENT_FILENAME).Open(Constants.vsViewKindCode).Visible = true;
+                    existingInstrumentCode = project.ProjectItems.AddFromFileCopy(instrumentFileLocation);
+                    existingInstrumentCode.Open(Constants.vsViewKindCode).Visible = true;
 
                     return true;
                 }
