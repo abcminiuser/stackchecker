@@ -15,6 +15,25 @@ namespace FourWalledCubicle.StackChecker
         private const string STACK_INSTRUMENT_FILENAME = "_StackInstrument.c";
         private static readonly byte[] STACK_INSTRUMENT_PATTERN = { 0xDE, 0xAD, 0xBE, 0xEF };
 
+        public static bool HasInstrumentation(DTE dte)
+        {
+            SolutionBuild solutionBuild = dte.Solution.SolutionBuild;
+            if ((solutionBuild == null) || (solutionBuild.StartupProjects == null))
+                return false;
+
+            foreach (String projectName in (Array)solutionBuild.StartupProjects)
+            {
+                Project project = dte.Solution.Projects.Item(projectName);
+                if (project == null)
+                    return false;
+
+                if (project.ProjectItems.Item(STACK_INSTRUMENT_FILENAME) == null)
+                    return false;
+            }
+
+            return true;
+        }
+
         public static bool AddInstrumentation(DTE dte)
         {
             SolutionBuild solutionBuild = dte.Solution.SolutionBuild;
@@ -52,17 +71,26 @@ namespace FourWalledCubicle.StackChecker
             return false;
         }
 
-        public static void GetStackUsage(ITarget2 target, IAddressSpace addressSpace, IMemorySegment memorySegment, out ulong current, out ulong max)
+        public static bool GetStackUsage(ITarget2 target, out ulong current, out ulong max)
         {
+            IAddressSpace ramAddressSpace;
+            IMemorySegment ramSegment;
+
+            current = 0;
+            max = 0;
+
+            if (GetInternalSRAM(target, out ramAddressSpace, out ramSegment) == false)
+                return false;
+
+            ulong? start = null;
+            ulong? end = null;
+
             try
             {
                 MemoryErrorRange[] errorRange;
                 byte[] result = target.GetMemory(
-                    target.GetAddressSpaceName(addressSpace.Name),
-                    memorySegment.Start, 1, (int)memorySegment.Size, 0, out errorRange);
-
-                ulong? start = null;
-                ulong? end = null;
+                    target.GetAddressSpaceName(ramAddressSpace.Name),
+                    ramAddressSpace.Start, 1, (int)ramAddressSpace.Size, 0, out errorRange);
 
                 for (ulong i = (ulong)(result.Length - 1); i >= 4; i -= 4)
                 {
@@ -80,18 +108,16 @@ namespace FourWalledCubicle.StackChecker
                         break;
                     }
                 }
+            }
+            catch { }
 
-                current = memorySegment.Size - (start ?? 0);
-                max = memorySegment.Size - (end ?? 0);
-            }
-            catch
-            {
-                current = 0;
-                max = memorySegment.Size;
-            }
+            current = ramAddressSpace.Size - (start ?? 0);
+            max = ramAddressSpace.Size - (end ?? 0);
+
+            return true;
         }
 
-        public static bool GetInternalSRAM(ITarget2 target, out IAddressSpace addressSpace, out IMemorySegment memorySegment)
+        private static bool GetInternalSRAM(ITarget2 target, out IAddressSpace addressSpace, out IMemorySegment memorySegment)
         {
             addressSpace = null;
             memorySegment = null;

@@ -12,8 +12,6 @@ namespace FourWalledCubicle.StackChecker
 {
     public partial class StackCheckerWindow : UserControl
     {
-        private const string STACK_INSTRUMENT_FILENAME = "_StackInstrument.c";
-
         private DTE mDTE;
         private DebuggerEvents mDebuggerEvents;
         private ITargetService2 mTargetService;
@@ -57,25 +55,12 @@ namespace FourWalledCubicle.StackChecker
 
             UpdateUI();
 
-            SolutionBuild solutionBuild = mDTE.Solution.SolutionBuild;
-            if ((solutionBuild != null) && (solutionBuild.StartupProjects != null))
+            if (StackUsageCalculator.HasInstrumentation(mDTE) == false)
             {
-                foreach (String projectName in (Array)solutionBuild.StartupProjects)
-                {
-                    Project project = mDTE.Solution.Projects.Item(projectName);
-                    if (project == null)
-                        return;
-
-                    if (project.ProjectItems.Item(STACK_INSTRUMENT_FILENAME) == null)
-                    {
-                        deviceName.Text = "(Missing Instrumentation)";
-                        stackUsageVal.Text = "(Missing Instrumentation)";
-                        return;
-                    }
-                }
+                deviceName.Text = "(Missing Instrumentation)";
+                stackUsageVal.Text = "(Missing Instrumentation)";
             }
-
-            if (mDTE.Debugger.CurrentMode == dbgDebugMode.dbgBreakMode)
+            else if (mDTE.Debugger.CurrentMode == dbgDebugMode.dbgBreakMode)
             {
                 mStackCalcThread = new System.Threading.Thread(UpdateStackUsageInfo);
                 mStackCalcThread.Start();
@@ -146,23 +131,18 @@ namespace FourWalledCubicle.StackChecker
             if (target == null)
                 return;
 
-            IAddressSpace internalSRAMSpace;
-            IMemorySegment internalSRAMSegment;
-            if (StackUsageCalculator.GetInternalSRAM(target, out internalSRAMSpace, out internalSRAMSegment))
+            Dispatcher.Invoke(new Action(
+                () =>
+                {
+                    stackUsageProgress.IsIndeterminate = true;
+                    deviceName.Text = target.Device.Name;
+                    deviceName.FontStyle = FontStyles.Normal;
+                    stackUsageVal.Text = "(Calculating...)";
+                }));
+
+            ulong currentUsage, maxUsage;
+            if (StackUsageCalculator.GetStackUsage(target, out currentUsage, out maxUsage))
             {
-                ulong currentUsage, maxUsage;
-
-                Dispatcher.Invoke(new Action(
-                    () =>
-                    {
-                        stackUsageProgress.IsIndeterminate = true;
-                        deviceName.Text = target.Device.Name;
-                        deviceName.FontStyle = FontStyles.Normal;
-                        stackUsageVal.Text = "(Calculating...)";
-                    }));
-
-                StackUsageCalculator.GetStackUsage(target, internalSRAMSpace, internalSRAMSegment, out currentUsage, out maxUsage);
-
                 Dispatcher.Invoke(new Action(
                     () =>
                     {
@@ -180,7 +160,7 @@ namespace FourWalledCubicle.StackChecker
                 Dispatcher.Invoke(new Action(
                     () =>
                     {
-                        deviceName.Text = target.Device.Name;
+                        stackUsageProgress.IsIndeterminate = false;
                         stackUsageVal.Text = "(Unsupported Device)";
                     }));
             }
