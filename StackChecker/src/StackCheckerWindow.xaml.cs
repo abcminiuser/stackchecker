@@ -13,7 +13,6 @@ namespace FourWalledCubicle.StackChecker
     public partial class StackCheckerWindow : UserControl
     {
         private const string STACK_INSTRUMENT_FILENAME = "_StackInstrument.c";
-        private readonly byte[] STACK_INSTRUMENT_PATTERN = { 0xDE, 0xAD, 0xBE, 0xEF };
 
         private DTE mDTE;
         private DebuggerEvents mDebuggerEvents;
@@ -41,41 +40,13 @@ namespace FourWalledCubicle.StackChecker
 
         private void addInstrumentCode_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            SolutionBuild solutionBuild = mDTE.Solution.SolutionBuild;
-            if ((solutionBuild == null) || (solutionBuild.StartupProjects == null))
-                return;
-
-            foreach (String projectName in (Array)solutionBuild.StartupProjects)
+            if (StackUsageCalculator.AddInstrumentation(mDTE))
             {
-                Project project = mDTE.Solution.Projects.Item(projectName);
-                if (project == null)
-                    return;
-
-                try
-                {
-                    string instrumentFileLocation = Path.Combine(Path.GetTempPath(), STACK_INSTRUMENT_FILENAME);
-
-                    StreamWriter instrumentCode = new StreamWriter(instrumentFileLocation);
-                    instrumentCode.Write(StackChecker.Resources.InstrumentationCode);
-                    instrumentCode.Close();
-
-                    ProjectItem existingInstrumentCode = project.ProjectItems.Item(STACK_INSTRUMENT_FILENAME);
-                    if (existingInstrumentCode != null)
-                        existingInstrumentCode.Document.Close();
-
-                    project.ProjectItems.AddFromFileCopy(instrumentFileLocation);
-                    project.ProjectItems.Item(STACK_INSTRUMENT_FILENAME).Open(Constants.vsViewKindCode).Visible = true;
-
-                    if (existingInstrumentCode == null)
-                    {
-                        ATServiceProvider.DialogService.ShowDialog(
-                            null,
-                            "Instrumenting code has been added to your project as a new source file." + Environment.NewLine + "Please recompile your project to enable.",
-                            "Stack Checker - Instrumenting Code Added",
-                            DialogButtonSet.Ok, DialogIcon.Information);
-                    }
-                }
-                catch { }
+                ATServiceProvider.DialogService.ShowDialog(
+                    null,
+                    "Instrumenting code has been added to your project as a new source file." + Environment.NewLine + "Please recompile your project to enable.",
+                    "Stack Checker - Instrumenting Code Added",
+                    DialogButtonSet.Ok, DialogIcon.Information);
             }
         }
 
@@ -177,28 +148,27 @@ namespace FourWalledCubicle.StackChecker
 
             IAddressSpace internalSRAMSpace;
             IMemorySegment internalSRAMSegment;
-            if (GetInternalSRAM(target, out internalSRAMSpace, out internalSRAMSegment))
+            if (StackUsageCalculator.GetInternalSRAM(target, out internalSRAMSpace, out internalSRAMSegment))
             {
                 ulong currentUsage, maxUsage;
 
                 Dispatcher.Invoke(new Action(
-                () =>
-                {
-                    stackUsageProgress.IsIndeterminate = true;
-                    deviceName.Text = target.Device.Name;
-                    deviceName.FontStyle = FontStyles.Normal;
-                    stackUsageVal.Text = "(Calculating...)";
-                }));
+                    () =>
+                    {
+                        stackUsageProgress.IsIndeterminate = true;
+                        deviceName.Text = target.Device.Name;
+                        deviceName.FontStyle = FontStyles.Normal;
+                        stackUsageVal.Text = "(Calculating...)";
+                    }));
 
-                GetStackUsage(target, internalSRAMSpace, internalSRAMSegment, out currentUsage, out maxUsage);
+                StackUsageCalculator.GetStackUsage(target, internalSRAMSpace, internalSRAMSegment, out currentUsage, out maxUsage);
 
                 Dispatcher.Invoke(new Action(
                     () =>
                     {
-                        stackUsageProgress.IsIndeterminate = false;
                         stackUsageProgress.Maximum = maxUsage;
                         stackUsageProgress.Value = currentUsage;
-
+                        stackUsageProgress.IsIndeterminate = false;
                         stackUsageVal.FontStyle = FontStyles.Normal;
                         stackUsageVal.Text = string.Format("{0}/{1} ({2}%)",
                             stackUsageProgress.Value.ToString(), stackUsageProgress.Maximum.ToString(),
@@ -214,73 +184,6 @@ namespace FourWalledCubicle.StackChecker
                         stackUsageVal.Text = "(Unsupported Device)";
                     }));
             }
-        }
-
-        void GetStackUsage(ITarget2 target, IAddressSpace addressSpace, IMemorySegment memorySegment, out ulong current, out ulong max)
-        {
-            try
-            {
-                MemoryErrorRange[] errorRange;
-                byte[] result = target.GetMemory(
-                    target.GetAddressSpaceName(addressSpace.Name),
-                    memorySegment.Start, 1, (int)memorySegment.Size, 0, out errorRange);
-
-                ulong? start = null;
-                ulong? end = null;
-
-                for (ulong i = (ulong)(result.Length - 1); i >= 4; i -= 4)
-                {
-                    if ((result[i - 3] == STACK_INSTRUMENT_PATTERN[0]) &&
-                        (result[i - 2] == STACK_INSTRUMENT_PATTERN[1]) &&
-                        (result[i - 1] == STACK_INSTRUMENT_PATTERN[2]) &&
-                        (result[i - 0] == STACK_INSTRUMENT_PATTERN[3]))
-                    {
-                        if (start.HasValue == false)
-                            start = (i + 1);
-                    }
-                    else if (start.HasValue)
-                    {
-                        end = (i + 1);
-                        break;
-                    }
-                }
-
-                current = memorySegment.Size - (start ?? 0);
-                max = memorySegment.Size - (end ?? 0);
-            }
-            catch
-            {
-                current = 0;
-                max = memorySegment.Size;
-            }
-        }
-
-        bool GetInternalSRAM(ITarget2 target, out IAddressSpace addressSpace, out IMemorySegment memorySegment)
-        {
-            addressSpace = null;
-            memorySegment = null;
-
-            if (target.Device.Architecture.StartsWith("AVR8") == false)
-                return false;
-
-            foreach (IAddressSpace mem in target.Device.AddressSpaces)
-            {
-                foreach (IMemorySegment seg in mem.MemorySegments)
-                {
-                    if (seg.Type.IndexOf("RAM", StringComparison.OrdinalIgnoreCase) < 0)
-                        continue;
-
-                    if ((seg.Name.IndexOf("IRAM", StringComparison.OrdinalIgnoreCase) >= 0) ||
-                        (seg.Name.IndexOf("INTERNAL_SRAM", StringComparison.OrdinalIgnoreCase) >= 0))
-                    {
-                        addressSpace = mem;
-                        memorySegment = seg;
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
     }
 }
