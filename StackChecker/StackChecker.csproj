@@ -118,10 +118,10 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="StackCheckerWindow.xaml.cs">
+    <Compile Include="src\StackCheckerWindow.xaml.cs">
       <DependentUpon>StackCheckerWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="StackCheckerToolWindow.cs" />
+    <Compile Include="src\StackCheckerToolWindow.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -129,7 +129,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="StackCheckerPackage.cs" />
+    <Compile Include="src\StackCheckerPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PkgCmdID.cs" />
   </ItemGroup>
@@ -177,7 +177,7 @@
     <Resource Include="Resources\GaugeIcon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="StackCheckerWindow.xaml">
+    <Page Include="src\StackCheckerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
