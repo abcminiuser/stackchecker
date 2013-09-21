@@ -73,11 +73,11 @@ namespace FourWalledCubicle.StackChecker
 
         public static bool GetStackUsage(ITarget2 target, out ulong current, out ulong max)
         {
-            IAddressSpace ramAddressSpace;
-            IMemorySegment ramSegment;
-
             current = 0;
             max = 0;
+
+            IAddressSpace ramAddressSpace;
+            IMemorySegment ramSegment;
 
             if (GetInternalSRAM(target, out ramAddressSpace, out ramSegment) == false)
                 return false;
@@ -90,7 +90,7 @@ namespace FourWalledCubicle.StackChecker
                 MemoryErrorRange[] errorRange;
                 byte[] result = target.GetMemory(
                     target.GetAddressSpaceName(ramAddressSpace.Name),
-                    ramAddressSpace.Start, 1, (int)ramAddressSpace.Size, 0, out errorRange);
+                    ramSegment.Start, 1, (int)ramSegment.Size, 0, out errorRange);
 
                 for (ulong i = (ulong)(result.Length - 1); i >= 4; i -= 4)
                 {
@@ -111,8 +111,8 @@ namespace FourWalledCubicle.StackChecker
             }
             catch { }
 
-            current = ramAddressSpace.Size - (start ?? 0);
-            max = ramAddressSpace.Size - (end ?? 0);
+            current = ramSegment.Size - (start ?? 0);
+            max = ramSegment.Size - (end ?? 0);
 
             return true;
         }
