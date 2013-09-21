@@ -22,10 +22,10 @@
 extern void *_end, *__stack;
 
 /** Aligns a given memory byte address to the nearest 32-bit address, rounding downwards. */
-#define __ALIGN32_DOWNWARDS(x) ((x) - ((x) & 0x03))
+#define __ALIGN32_DOWNWARDS(x) ((uintptr_t)(x) - ((uintptr_t)(x) & 0x03))
 
 /** Aligns a given memory byte address to the nearest 32-bit address, rounding upwards. */
-#define __ALIGN32_UPWARDS(x)   ((x) + ((x) & 0x03))
+#define __ALIGN32_UPWARDS(x)   ((uintptr_t)(x) + ((uintptr_t)(x) & 0x03))
 
 /** Swaps the endianness of a given 16-bit value. */
 #define __SWAP_ENDIAN16(x)     ((( (x) & 0xFF00) >> 8) | (( (x) & 0x00FF) << 8))
@@ -44,11 +44,9 @@ extern void *_end, *__stack;
 void _StackPaint(void) __attribute__((naked)) __attribute__((section (".init1")));
 void _StackPaint(void)
 {
-	uint32_t *fill_start = __ALIGN32_UPWARDS((uintptr_t)&_end);
-	uint32_t *fill_end   = __ALIGN32_DOWNWARDS((uintptr_t)&__stack);
+	uint32_t* fill_start = (uint32_t*)__ALIGN32_UPWARDS(&_end);
+	uint32_t* fill_end   = (uint32_t*)__ALIGN32_DOWNWARDS(&__stack);
 	
 	for (uint32_t* fill_pos = fill_start; fill_pos < fill_end; fill_pos++)
-	{
 		*fill_pos = __SWAP_ENDIAN32(0xDEADBEEF);
-	}
 }
