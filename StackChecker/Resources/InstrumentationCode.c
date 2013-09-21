@@ -21,6 +21,18 @@
  */
 extern void *_end, *__stack;
 
+/** Aligns a given memory byte address to the nearest 32-bit address, rounding downwards. */
+#define __ALIGN32_DOWNWARDS(x) ((x) - ((x) & 0x03))
+
+/** Aligns a given memory byte address to the nearest 32-bit address, rounding upwards. */
+#define __ALIGN32_UPWARDS(x)   ((x) + ((x) & 0x03))
+
+/** Swaps the endianness of a given 16-bit value. */
+#define __SWAP_ENDIAN16(x)     ((( (x) & 0xFF00) >> 8) | (( (x) & 0x00FF) << 8))
+
+/** Swaps the endianness of a given 32-bit value. */
+#define __SWAP_ENDIAN32(x)     (__SWAP_ENDIAN16(( (x) & 0xFFFF0000UL) >> 16) | (__SWAP_ENDIAN16( (x) & 0x0000FFFFUL) << 16))
+
 /** \internal
  *  \brief Low level stack painting function, hooked into the avr-libc initialization code.
  *
@@ -32,12 +44,11 @@ extern void *_end, *__stack;
 void _StackPaint(void) __attribute__((naked)) __attribute__((section (".init1")));
 void _StackPaint(void)
 {
-	const uint8_t fill_pattern[] = {0xDE, 0xAD, 0xBE, 0xEF};
-	uint8_t *fill_start = (uint8_t*)&_end;
-	uint8_t *fill_end = (uint8_t*)&__stack;
-
-	for (uint8_t* fill_pos = fill_start; fill_pos < fill_end; fill_pos++)
+	uint32_t *fill_start = __ALIGN32_UPWARDS((uintptr_t)&_end);
+	uint32_t *fill_end   = __ALIGN32_DOWNWARDS((uintptr_t)&__stack);
+	
+	for (uint32_t* fill_pos = fill_start; fill_pos < fill_end; fill_pos++)
 	{
-		*fill_pos = fill_pattern[(uintptr_t)fill_pos & 0x03];
+		*fill_pos = __SWAP_ENDIAN32(0xDEADBEEF);
 	}
 }
