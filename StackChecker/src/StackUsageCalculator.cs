@@ -92,19 +92,19 @@ namespace FourWalledCubicle.StackChecker
                     target.GetAddressSpaceName(ramAddressSpace.Name),
                     ramSegment.Start, 1, (int)ramSegment.Size, 0, out errorRange);
 
-                for (ulong i = (ulong)(result.Length - 1); i >= 4; i -= 4)
+                for (ulong i = 0; i < (ulong)(result.Length - 3); i += 4)
                 {
-                    if ((result[i - 3] == STACK_INSTRUMENT_PATTERN[0]) &&
-                        (result[i - 2] == STACK_INSTRUMENT_PATTERN[1]) &&
-                        (result[i - 1] == STACK_INSTRUMENT_PATTERN[2]) &&
-                        (result[i - 0] == STACK_INSTRUMENT_PATTERN[3]))
+                    if ((result[i + 0] == STACK_INSTRUMENT_PATTERN[0]) &&
+                        (result[i + 1] == STACK_INSTRUMENT_PATTERN[1]) &&
+                        (result[i + 2] == STACK_INSTRUMENT_PATTERN[2]) &&
+                        (result[i + 3] == STACK_INSTRUMENT_PATTERN[3]))
                     {
-                        if (start.HasValue == false)
-                            start = (i + 1);
+                        if (end.HasValue == false)
+                            end = i;
                     }
-                    else if (start.HasValue)
+                    else if (end.HasValue)
                     {
-                        end = (i + 1);
+                        start = i;
                         break;
                     }
                 }
