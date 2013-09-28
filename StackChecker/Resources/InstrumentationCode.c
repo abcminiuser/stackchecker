@@ -41,7 +41,7 @@ extern void *_end, *__stack;
  *  by the Stack Checker extension when a debug session is halted to determine
  *  the maximum stack usage of the running application.
  */
-void _StackPaint(void) __attribute__((naked)) __attribute__((section (".init1")));
+void _StackPaint(void) __attribute__((naked)) __attribute__((optimize("O3"))) __attribute__((section (".init1")));
 void _StackPaint(void)
 {
 	uint32_t* fill_start = (uint32_t*)__ALIGN32_UPWARDS(&_end);
