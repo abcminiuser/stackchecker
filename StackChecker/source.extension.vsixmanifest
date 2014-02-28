@@ -3,7 +3,7 @@
   <Identifier Id="fbc19046-ee56-4aa8-be8e-3998149b311a">
     <Name>Maximum Stack Usage Checker</Name>
     <Author>FourWalledCubicle</Author>
-    <Version>1.1</Version>
+    <Version>1.2</Version>
     <Description xml:space="preserve">For AVR8 architecture devices only. Maximum stack usage monitor, showing a visual and percentage of stack used in an application.</Description>
     <Locale>1033</Locale>
     <MoreInfoUrl>http://www.fourwalledcubicle.com</MoreInfoUrl>
@@ -12,6 +12,7 @@
     <PreviewImage>Preview.png</PreviewImage>
     <InstalledByMsi>false</InstalledByMsi>
     <SupportedProducts>
+      <IsolatedShell Version="6.2">AtmelStudio</IsolatedShell>
       <IsolatedShell Version="6.1">AtmelStudio</IsolatedShell>
     </SupportedProducts>
     <SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.0" />

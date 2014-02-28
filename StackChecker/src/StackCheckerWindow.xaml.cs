@@ -1,20 +1,17 @@
 ﻿using System;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using Atmel.Studio.Services;
-using Atmel.Studio.Services.Device;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
-using System.Threading;
 
 namespace FourWalledCubicle.StackChecker
 {
     public partial class StackCheckerWindow : UserControl
     {
-        private DTE mDTE;
-        private DebuggerEvents mDebuggerEvents;
-        private ITargetService2 mTargetService;
+        private readonly DTE mDTE;
+        private readonly DebuggerEvents mDebuggerEvents;
+        private readonly ITargetService2 mTargetService;
 
         private System.Threading.Thread mStackCalcThread = null;
 
