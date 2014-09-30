@@ -46,7 +46,8 @@ void _StackPaint(void)
 {
 	uint32_t* fill_start = (uint32_t*)__ALIGN32_UPWARDS(&_end);
 	uint32_t* fill_end   = (uint32_t*)__ALIGN32_DOWNWARDS(&__stack);
+	uint32_t* fill_pos;
 	
-	for (uint32_t* fill_pos = fill_start; fill_pos < fill_end; fill_pos++)
+	for (fill_pos = fill_start; fill_pos < fill_end; fill_pos++)
 		*fill_pos = __SWAP_ENDIAN32(0xDEADBEEF);
 }
